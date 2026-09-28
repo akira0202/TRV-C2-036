@@ -1,0 +1,43 @@
+# Agent Manifest — AgentRegistry entry point
+# AgentRegistry reads every key below at ROOT level — do NOT nest keys under an
+# `agent:` block (that shape is invisible to the registry: namespace/enabled fall
+# back to defaults and name/version never resolve).
+id: "TRV-C2-036"
+name: "Destination Market-Comparison Evidence Brief Generator"
+namespace: "trv-c2-036"
+version: "0.1.0"
+enabled: true
+category: "Cat 2"
+industry: "TRV"
+
+# Level 2 base agent type (logical node-backbone archetype; the template inherits
+# AgentBaseGraph directly at L1 — it does not subclass the DocGenerationAgent class)
+base_type: "DocGenerationAgent"  # RAGAgent | ChatAgent | ReActAgent | DocGenerationAgent
+
+# Entry point — single dotted import path (module.Class). AgentRegistry does
+# manifest["class"].rsplit(".", 1) to get (module, class_name). The outer L1-direct
+# AgentBaseGraph is DestinationMarketComparisonAgent (see docs/02 "Design class
+# names ↔ manifest").
+class: "src.graph.graph.DestinationMarketComparisonAgent"
+
+# Security
+required_trust_level: "VERIFIED_EXTERNAL"
+
+# Compile-time gates — declare every secret/extra actually used.
+# The core path stays deterministic. The LLM path resolves the Azure OpenAI connection values
+# through src/services/llm.py at call time, so all three are declared here: the manifest states
+# which secrets the deployment must provision. Declaring them does not change what the node does
+# when a value cannot be resolved — that behaviour is defined in docs/02_design.md and is
+# unchanged. Never place a secret value in this file or in State.
+# extras names the framework extra the LLM client imports. The client is still constructed
+# inside the call path, not at startup.
+requires:
+  secrets:
+    - AZURE_OPENAI_API_KEY
+    - AZURE_OPENAI_ENDPOINT
+    - AZURE_OPENAI_DEPLOYMENT
+  extras:
+    - openai
+
+# Runtime parameters (max_retry, timeout_seconds, ...) live in config/config.yaml,
+# which AgentRegistry loads separately and passes as Graph(config=...).

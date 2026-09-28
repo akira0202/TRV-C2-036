@@ -1,0 +1,5 @@
+# Runtime parameters — AgentRegistry loads this file separately from config/agent.yaml
+# and passes its contents as Graph(config=...). The static discovery manifest
+# (config/agent.yaml) must not carry runtime-tunable parameters.
+max_retry: 3
+timeout_seconds: 30
